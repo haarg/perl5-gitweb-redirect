@@ -111,35 +111,35 @@ sub {
     # TODO :( need tag name
   }
   elsif ($action eq 'commitdiff' and my $parent = $params->{hp}) {
-    return final 'compare', $parent . '...' . branch($def_branch, @path);
+    return final $repo, 'compare', $parent . '...' . branch($def_branch, @path);
   }
   elsif ($action eq 'blobdiff') {
     # TODO currently ignoring file since github doesn't have that
     my ($branch, $file) = branch_path(@_);
-    return final 'compare', join '...', split /\.\./, $branch, 2;
+    return final $repo, 'compare', join '...', split /\.\./, $branch, 2;
   }
   elsif ($action eq 'blobdiff_plain') {
     # TODO currently ignoring file since github doesn't have that
     my ($branch, $file) = branch_path(@_);
-    return final 'compare', join('...', split /\.\./, $branch, 2) . '.patch';
+    return final $repo, 'compare', join('...', split /\.\./, $branch, 2) . '.patch';
   }
   elsif ($new_action = $actions{$action}) {
-    return final $new_action;
+    return final $repo, $new_action;
   }
   elsif ($new_action = $branch_actions{$action}) {
-    return final $new_action, branch($def_branch, @path);
+    return final $repo, $new_action, branch($def_branch, @path);
   }
   elsif ($new_action = $path_actions{$action}) {
-    return final $new_action, branch_path($def_branch, @path);
+    return final $repo, $new_action, branch_path($def_branch, @path);
   }
   elsif ($action eq 'commitdiff_plain') {
-    return final 'commit', branch($def_branch, @path) . '.diff';
+    return final $repo, 'commit', branch($def_branch, @path) . '.diff';
   }
   elsif ($action eq 'patch') {
-    return final 'commit', branch($def_branch, @path) . '.patch';
+    return final $repo, 'commit', branch($def_branch, @path) . '.patch';
   }
   elsif ($action eq 'snapshot') {
-    return final 'archive', branch($def_branch, @path);
+    return final $repo, 'archive', branch($def_branch, @path);
   }
 
   return near 'perl5';
