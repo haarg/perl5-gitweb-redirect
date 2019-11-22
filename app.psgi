@@ -26,6 +26,7 @@ sub near {
 sub branch {
   my ($def, @path) = @_;
   my $branch = join('/', @path);
+  undef $branch if $branch eq 'HEAD';
   $branch ||= $def;
   $branch =~ s{\Arefs/(?:heads|tags)/}{};
   $branch =~ s{\.\.\.refs/(?:heads|tags)/}{};
