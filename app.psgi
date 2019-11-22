@@ -3,6 +3,8 @@ use warnings;
 
 use Plack::Request;
 use WWW::Form::UrlEncoded qw(build_urlencoded_utf8);
+use HTTP::Tiny;
+use JSON::MaybeXS qw(decode_json);
 
 my $org_root = 'https://github.com/Perl';
 
@@ -63,6 +65,9 @@ my %path_actions = (
   tree => 'tree',
 );
 
+my $ua = HTTP::Tiny->new;
+my %tags;
+
 sub {
   my ($env) = @_;
   my $req = Plack::Request->new($env);
@@ -108,7 +113,17 @@ sub {
   }
   elsif ($action eq 'tag') {
     my $tag_sha = shift @path;
-    # TODO :( need tag name
+    return $tags{$tag_sha} ||= do {
+        my $res = $ua->get("https://api.github.com/repos/Perl/$repo/git/tags/$tag_sha");
+        if ($res->{success}) {
+            my $data = decode_json($res->{content});
+            my $tag = $data->{tag} or die;
+            final $repo, 'releases', 'tag', $tag;
+        }
+        else {
+            [$res->{status}, [], []];
+        }
+    };
   }
   elsif ($action eq 'commitdiff' and my $parent = $params->{hp}) {
     return final $repo, 'compare', $parent . '...' . branch($def_branch, @path);
